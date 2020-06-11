@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.activiti.dao.GroupDao">
+
+    <resultMap type="Group" id="GroupResult">
+        <result property="id" column="id"/>
+        <result property="abb" column="abb"/>
+        <result property="name" column="name_"/>
+    </resultMap>
+    <select id="findGroup" resultMap="GroupResult">
+			select * from sys_role
+	</select>
+    <select id="groupPage" parameterType="Map" resultMap="GroupResult">
+        select * from sys_role
+        <if test="pageIndex!=null and pageSize!=null">
+            limit #{pageIndex},#{pageSize}
+        </if>
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="GroupResult">
+		SELECT * from sys_role where id = #{id}
+	</select>
+
+    <select id="findByName" parameterType="String" resultMap="GroupResult">
+		SELECT * from sys_role where name_ = #{name}
+	</select>
+
+    <select id="findByAbb" parameterType="String" resultMap="GroupResult">
+		SELECT * from sys_role where abb = #{abb}
+	</select>
+
+    <select id="groupCount" parameterType="Map" resultType="int">
+		select count(1) from act_id_group
+	</select>
+
+    <update id="updateGroup" parameterType="com.activiti.model.Group">
+        update sys_role
+        <set>
+            <if test="name!=null and name!='' ">
+                name_ = #{name}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <insert id="addGroup" parameterType="com.activiti.model.Group">
+		insert into sys_role values(0 ,#{abb},#{name});
+	</insert>
+
+    <delete id="deleteGroup" parameterType="java.util.List">
+        delete from sys_role where id in
+        <foreach collection="list" item="id" index="index" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+</mapper>

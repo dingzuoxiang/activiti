@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.activiti.dao.BillDao">
+
+    <resultMap type="Bill" id="BillResult">
+        <result property="id" column="id"/>
+        <result property="userName" column="userName"/>
+        <result property="billDate" column="billDate"/>
+        <result property="billMoney" column="billMoney"/>
+        <result property="billDetail" column="billDetail"/>
+        <result property="state" column="state"/>
+        <result property="processInstanceId" column="processInstanceId"/>
+        <association property="user" column="userName" select="com.activiti.dao.UserDao.findByUserName"/>
+    </resultMap>
+
+    <select id="billPage" parameterType="Map" resultMap="BillResult">
+        select * from t_bill
+        <where>
+            <if test="username!=null and username!='' ">
+                and userName = #{username}
+            </if>
+        </where>
+        order by billDate desc
+        <if test="pageIndex!=null and pageSize!=null">
+            limit #{pageIndex},#{pageSize}
+        </if>
+    </select>
+
+    <select id="billCount" parameterType="Map" resultType="int">
+        select count(1) from t_bill
+        <where>
+            <if test="username!=null and username!='' ">
+                and userName = #{username}
+            </if>
+        </where>
+    </select>
+
+
+    <insert id="addBill" parameterType="Bill">
+		insert into t_bill values(null,#{user.userName},#{billDate},#{billMoney},#{billDetail},#{state},#{processInstanceId})
+	</insert>
+
+    <select id="findById" parameterType="int" resultMap="BillResult">
+		select * from t_bill where id=#{id}
+	</select>
+    <select id="getBillByTaskId" parameterType="String" resultMap="BillResult">
+		select * from  t_bill
+		where processInstanceId=#{processInstanceId}
+	</select>
+    <update id="updateBill" parameterType="Bill">
+        update t_bill
+        <set>
+            <if test="state!=null and state!='' ">
+                state=#{state},
+            </if>
+            <if test="processInstanceId!=null and processInstanceId!='' ">
+                processInstanceId=#{processInstanceId},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+</mapper>

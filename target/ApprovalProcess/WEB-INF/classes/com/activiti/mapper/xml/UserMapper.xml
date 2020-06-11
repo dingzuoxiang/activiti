@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.activiti.dao.UserDao">
+    <resultMap type="User" id="UserResult">
+        <result property="id" column="id"/>
+        <result property="userName" column="username"/>
+        <result property="firstName" column="first"/>
+        <result property="lastName" column="last"/>
+        <result property="group" column="role"/>
+        <result property="email" column="mail"/>
+        <result property="call" column="telephone"/>
+        <result property="password" column="password"/>
+        <result property="leaderId" column="leader_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="dept_parentId" column="parent_id"/>
+        <result property="createTime" column="operator_time"/>
+        <result property="roleAbb" column="roleAbb"/>
+    </resultMap>
+
+    <select id="userLogin" parameterType="Map" resultMap="UserResult">
+        SELECT u.id,u.username,u.first,u.last,u.role,u.telephone,u.mail,u.password,u.leader_id,d.id as dept_id,d.name as dept_name,d.parent_id,u.operator_time,r.abb as roleAbb
+	        from sys_user as u
+	        JOIN sys_dept as d on u.dept_id = d.id
+	        JOIN sys_role as r on r.name_ = u.role
+	        WHERE u.username = #{username} and u.password = #{password} and u.role = #{role}
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="UserResult">
+		select * from sys_user where id=#{id}
+	</select>
+
+    <select id="findByUserName" parameterType="String" resultMap="UserResult">
+		select * from sys_user where username=#{userName}
+	</select>
+
+    <select id="userPage" parameterType="Map" resultMap="UserResult">
+        select u.id,u.username,u.first,u.last,u.role,u.telephone,u.mail,u.password,u.leader_id,d.id as dept_id,d.name as dept_name,d.parent_id,u.operator_time
+        from sys_user as u
+        JOIN sys_dept as d on u.dept_id = d.id
+        <where>
+            <if test="username!=null and username!='' ">
+                and u.username like #{username}
+            </if>
+        </where>
+        <if test="pageIndex!=null and pageSize!=null">
+            limit #{pageIndex},#{pageSize}
+        </if>
+    </select>
+
+    <select id="userCount" parameterType="Map" resultType="int">
+        select count(1) from sys_user
+        <where>
+            <if test="username!=null and username!='' ">
+                and username like #{username}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserByRoleDeptId" parameterType="Map" resultMap="UserResult">
+        select * from sys_user
+        <where>
+            <if test="name!=null and name!='' ">
+                and username = #{name}
+            </if>
+            <if test="role!=null and role!='' ">
+                and role = #{role}
+            </if>
+            <if test="deptId!=0 and deptId != null">
+                and dept_id = #{deptId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserByRoleAndDeptId" parameterType="Map" resultMap="UserResult">
+        select * from sys_user where role = #{role} and dept_id = #{deptId}
+    </select>
+
+    <select id="getUserByDeptIds" parameterType="java.util.List" resultMap="UserResult">
+        select * from sys_user where role = '组长' and dept_id in
+        <foreach collection="list" item="deptId" index="index" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+    </select>
+
+    <delete id="deleteUser" parameterType="java.util.List">
+        delete from sys_user where id in
+        <foreach collection="list" item="id" index="index" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addUser" parameterType="User">
+		insert into sys_user values(0 ,#{userName},#{firstName},#{lastName},#{group},#{call},#{email},#{password},#{leaderId},#{deptId},#{createTime});
+	</insert>
+
+    <update id="updateUser" parameterType="User">
+        update sys_user
+        <set>
+            <if test="firstName!=null and firstName!='' ">
+                first=#{firstName},
+            </if>
+            <if test="lastName!=null and lastName!='' ">
+                last=#{lastName},
+            </if>
+            <if test="group!=null and group!='' ">
+                role=#{group},
+            </if>
+            <if test="email!=null and email!='' ">
+                mail=#{email},
+            </if>
+            <if test="call!=null and call!='' ">
+                telephone=#{call},
+            </if>
+            <if test="password!=null and password!='' ">
+                password=#{password},
+            </if>
+            <if test="leaderId!=null and leaderId!=0 ">
+                leader_id=#{leaderId},
+            </if>
+            <if test="deptId!=null and deptId!=0 ">
+                dept_id=#{deptId}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="modifyPassword" parameterType="Map">
+        update sys_user
+        <set>
+            <if test="password!=null and password!='' ">
+                password=#{password},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>
